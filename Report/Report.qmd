@@ -1,0 +1,429 @@
+---
+title: Report on Indian Railway Analysis
+format: pdf
+editor: visual
+header-includes:
+   - \usepackage{amsmath, amssymb, setspace}
+   - \onehalfspacing
+   - \usepackage{etoolbox} 
+   - \makeatletter 
+   - \preto{\@verbatim}{\topsep=3pt \partopsep=3pt } 
+   - \makeatother
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(dplyr)
+load("../Data/merged.Rdata")
+```
+
+# Table of Contents
+
+1\) Data
+
+2\) Obtaining the data
+
+3\) Biases in the data
+
+4\) Questions
+
+5\) Important visualizations
+
+6\) Final conclusions
+
+7\) References
+
+\newpage
+
+\Huge 1. Data
+
+\normalsize
+
+Our Data looks like:
+
+![Data](Image0.png)
+
+Our Data contains 2942 rows and 18 columns and description of each column is given below:
+
+| Column Name      | Explanation                                          |
+|------------------|------------------------------------------------------|
+| **Train#**       | Unique identification number assigned to each train. |
+| **Train Name**   | The designated name of the train                     |
+| **Zone**         | The railway zone associated with the train's route   |
+| **Source**       | The originating station of the train journey         |
+| **Dept.**        | Departure time from the source station               |
+| **Dest**:        | The final destination station of the train           |
+| **Arr.**         | Arrival time at the destination station              |
+| **Travel Time**  | The total time taken for the journey                 |
+| **Dist.**        | The distance covered by the train during the journey |
+| **Halt**         | Number of scheduled halts or stops                   |
+| **Avg Speed**    | The average speed of the train                       |
+| **Train_Type**   | Indicates the type or category of the train          |
+| **StationNames** | Contain Full name of departure station               |
+| **Delays**       | Avg Delay of train in past one year                  |
+| **Source_Lat**   | The latitude coordinate of the source station        |
+| **Source_Lon**   | The longitude coordinate of the source station       |
+| **Dest_Lat**     | The latitude coordinate of the destination station   |
+| **Dest_Lon**     | The longitude coordinate of the destination station  |
+
+: Explanation of Dataset
+
+\newpage
+
+\Huge 2. Obtaining the Data
+
+\normalsize
+
+## 2.1 Initial Data Extraction
+
+We started with the website [Total Train Info](https://www.totaltraininfo.com/) and extracted links for different types of trains.
+
+![](Image1.png){fig-align="center"}
+
+## 2.2 Train Name Extraction
+
+Next, we extracted the names of different types of trains from the obtained links. This information will be used in subsequent steps.
+
+## 2.3 Webpage Scraping
+
+We moved to the webpage of each train and extracted the data table for each type of train, storing the results in a list. The following screenshot illustrates the process:
+
+![Webpage of specific Train Type](Image2.png){fig-align="center" width="497"}
+
+## 2.4 Data Cleaning and Merging
+
+After obtaining the data tables, the next step involved cleaning the data to ensure its quality and consistency. The cleaning process included:
+
+-   We addressed missing values (NA) in the dataset by either imputing them using appropriate statistical methods or removing rows or columns containing these missing values.
+
+-   In the process of cleaning, we noticed that certain columns contained additional text, such as "km/h" and "km," in the entries for average speed (\`avg_speed\`) and distance (\`Dist\`). To ensure uniformity and facilitate numerical analysis, we removed these extraneous text elements from the respective columns.
+
+    For example, if the \`avg_speed\` column contained entries like "60 km/h," we extracted the numerical value (60) and stored it in the column, discarding the unit information.
+
+-   To enhance the interpretability of the dataset and enable categorical analysis, we added a new column, \`train_type\`, to each data table. This column indicates the type of train associated with each record, allowing for easy segmentation and comparison.
+
+-   With the data now cleaned and standardized across all tables, we proceeded to merge them into a single cohesive dataset. This consolidated dataset serves as the foundation for further analysis, providing a comprehensive overview of the various train types, their characteristics, and relevant information for subsequent investigations.
+
+    ## 2.5 Scraping Average Delays
+
+    Now we wanted to scrape average delays of train in past one year forw which we used this site [runningstatus.in](https://runningstatus.in/history/) .
+
+    ![Website used for scraping Average Delays](Image3.png)
+
+    ## 2.6 Average Delays Extraction
+
+    Then we created links of each train and went to that page and then scraped the average delays of the trains.
+
+    ![Webpage of a particular train](Image4.png)
+
+    ## 2.7 Getting Latitudes and Longitudes of Railways Stations
+
+    For latitudes and longitudes we used csv file since we were not able to scrape out this data. Because the only site containing it for free was out of date.
+
+\newpage
+
+\Huge 3. Biases in Data \normalsize
+
+## 3.1 Data was collected from third party sites
+
+The data of trains is scraped out from sites like [Total Train Info](https://www.totaltraininfo.com/) , [runningstatus.in](https://runningstatus.in/history/) and [mapsofindia](https://www.mapsofindia.com/railways/station-code/) are 3rd party sites and has no affiliation with the Indian Railways Officially site.
+
+## 3.2 Fast changing and Uncertain dynamic data
+
+Another inherent bias in the data is the dynamic and fast-changing nature of train information. Given the dynamic conditions of the rail network. For instance, the dynamic nature of train information may manifest in scenarios where a train's scheduled departure time is altered abruptly, or in some cases, a train may be entirely discarded from the schedule.
+
+## 3.3 Incomplete Data and Sampling Bias
+
+In our data we have only considered the data of source location and final destination of our train. Due to the above reason in actual India has 7,325 (refrence1) stations but our data contains only 562 stations which lead to sampling bias since the origin and final destination stations are usually the large stations.
+
+\newpage
+
+\huge4. Questions
+
+\normalsize
+
+1.  When planning a journey between two different locations in India, faced with multiple train options offering varying travel times and ticket prices, how can one determine the most suitable train with least average delays?
+
+2.  Which train types are most widely distributed across various regions of India?
+
+3.  Are there specific geographical areas where certain train types are concentrated?
+
+4.  Why do certain regions in India, such as Karnataka, Andhra Pradesh, Himachal Pradesh, etc., experience limited passenger train connectivity, and what factors may contribute to this restriction in railway development?
+
+5.  Is there any relation between duration of train journey and the delay in that journey. Is it True that long routes train are having more delays?
+
+6.  In what aspects new Train services like Vande Bharat are different from the old ones?
+
+7.  Which train services are more prominent in a particular zone of India?
+
+8.  Which zones of India are more dense comparative to others. Are they dense for a particular train type or as a whole?
+
+9.  In a particular zone which Train are faster than other and do the same trend continues in other zones of India?
+
+\newpage
+
+\huge5. Visualizations
+
+\normalsize
+
+There were multiple visualizations based on cross-sectional rows as well as columns of our data.
+
+## 5.1 Delays, Average Speed and Duration Group
+
+First, we plotted a scatter plot between the average delays and the average speed of the trains and it came out to be something like this:
+
+```{r, cache=TRUE}
+#| warning: false
+#| echo: false
+library(ggplot2)
+
+ggplot(all_trains_table, aes(y = Delays, x = `Avg Speed`)) +geom_point()+
+  labs(
+    title = "Scatter Plot of Delays v/s Speed",
+    x = "Average Speed (km/hr)",
+    y = "Average Delay",
+  )
+```
+
+However, since a lot the data points were accumulated close to zero, we decided to plot the logarithm of average delays v/s the average speed.
+
+```{r, cache=TRUE}
+#| warning: false
+#| echo: false
+library(ggplot2)
+load("../Data/merged.Rdata")
+
+ggplot(all_trains_table, aes(y = log(Delays), x = `Avg Speed`)) +geom_point()+
+  labs(
+    title = "Scatter Plot of log of Delays v/s Speed",
+    x = "Average Speed (km/hr)",
+    y = "log(Average Delay)",
+  )
+```
+
+However, as is clear from the plot, there was no discernible or clear relationship visible between average speed and the delays of the trains. So, we decided to color code the points based on the duration group of the trains.\
+We divided all the trains into 3 groups: long duration trains, medium duration trains and short duration trains with 30-60 hours, 15-30 hours and 0-15 hours long journey respectively.
+
+And, the result was this:
+
+```{r, cache=TRUE, width=8, fig.width=8, fig.height=4}
+#| warning: false
+#| echo: false
+
+ggplot(all_trains_table, aes(y = log(Delays), x = `Avg Speed`, color=duration_group)) +geom_point()+
+  labs(
+    title = "Scatter Plot of log of Delays v/s Speed and duration group",
+    x = "Average Speed (km/hr)",
+    y = "log(Average Delay)",
+    color = "Duration Group"
+  )
+```
+
+Based on this graph, here are our findings:
+
+-   Short duration trains: The number of short duration trains is much more than both long and medium duration trains combined. However, the spread average delay is contained but has some outliers.
+
+-   Medium duration trains: These trains have longer delays with a larger spread when compared with the other two categories.
+
+-   Long duration trains: The average delays are shorter than both short and medium duration trains. However, the number of data points is also lesser than the other two.
+
+However, even after categorizing the data into different groups, we still couldn't identify any relationship between the Average speed and delays of the trains.\
+Thus, we created a box plot of various duration groups with respect to average delays and our previous findings were confirmed:
+
+```{r, cache=TRUE, width=8, fig.width=8, fig.height=4}
+#| warning: false
+#| echo: false
+
+ggplot(all_trains_table, aes(x = duration_group, y = Delays, fill = duration_group)) +
+    geom_boxplot() +
+    labs(
+      title = "Boxplot of Delays Grouped by Duration Group",
+      x = "Duration Group",
+      y = "Delay",
+      fill = "Duration Group"
+    )
+```
+
+The median as well as the spread of the medium trains is the most. The spread as well as the mdeian of the long duration trains is the least. However, that can be attributed to the fact that the number of long duration trains is also the least.\
+Here is a summary of average delays based on the duration group:
+
+```{r, cache=FALSE, fig.align='center'}
+#| warning: false
+#| echo: false
+
+ table <- all_trains_table %>% 
+    group_by(duration_group) %>% 
+    summarize(
+      Avg_delay = mean(Delays, na.rm = TRUE),
+      Count = n()
+    )%>%
+  rename(`Duration Group` = duration_group)
+
+as.data.frame(table)
+
+```
+
+## 5.2 Geographical Analysis
+
+Next we plotted the source stations of various train types on the map of India as shown below:
+
+![Map](map_ss.png){fig-align="center" height="300"}
+
+We analysed different train types based on the location of their source stations and came across the following two conclusions:
+
+-   Rajdhani:\
+    As is visible from the following map, rajdhani generally moves from state capitals. However, the source stations for this train are not evenly distributed across the nation.
+
+![Rajdhani map](map1.png){fig-align="center" height="250"}.
+
+-   Passenger: The passenger train serves as the backbone of the Indian Railways as it is affordable and accessible for a large portion of the population. Also, as can be seen from the graph, the source stations for passenger trains are more evenly distributed when compared with other much popular trains like rajdhani or shatabdi.\
+    However, it was interesting to note that the stations are less in the western as well as the southern region of the nation.
+
+![Passenger map](map2.png){fig-align="center" height="250"}
+
+We further plotted a bar graph based on the number of trains in each zone for various train types:
+
+1.  Shatabdi
+
+```{r, cache=FALSE}
+#| warning: false
+#| echo: false
+zone_data <- all_trains_table[all_trains_table$Train_Type == "shatabdi", ]
+zone <- zone_data %>% group_by(Zone) %>% summarise(n = n())
+ggplot(data = zone) + 
+  geom_bar(mapping = aes(x = reorder(Zone, n), y = n, fill = Zone), stat = "identity") +
+  labs(
+    title = "Number of Shatabdi trains in various zones",
+    x = "Zone",
+    y = "count",
+    color = "Zone"
+  )
+```
+
+2.  Vande Bharat
+
+```{r, cache=FALSE, width=8, fig.width=8, fig.height=5}
+#| warning: false
+#| echo: false
+zone_data <- all_trains_table[all_trains_table$Train_Type == "vande-bharat", ]
+zone <- zone_data %>% group_by(Zone) %>% summarise(n = n())
+ggplot(data = zone) + 
+  geom_bar(mapping = aes(x = reorder(Zone, n), y = n, fill = Zone), stat = "identity") +
+  labs(
+    title = "Number of vande bharat trains in various zones",
+    x = "Zone",
+    y = "count",
+    color = "Zone"
+  )
+```
+
+As is clearly visible from the graphs, the northern railways comprises most dense zone of Indian Railways.\
+Also, Vande Bharat train is comparatively more evenly distributed among different zones than Shatabdi.
+
+## 5.3 Average Speed v/s Distance of the journey
+
+Next, we plotted the average speed of various trains against the distance covered by them on a give journey. Further, we color coded the data based on various zones.\
+It was clear as per our findings that as the distance covered by a train increases, its average speed also increases. Thus, if a user tries to find suitable trains for a longer journey, the train with greater speed are most likely to occur on the top.
+
+```{r, cache=FALSE, width=8, fig.width=8, fig.height=5}
+#| warning: false
+#| echo: false
+
+subset_data <- all_trains_table[all_trains_table$Zone %in% c("NR", "WR", "NFR"), ]
+  
+# Convert Zone to a factor (if not already done)
+subset_data$Zone <- factor(subset_data$Zone)
+  
+# Plot the scatter plot
+plot(
+    log(as.numeric(subset_data$Dist.)),
+    subset_data$`Avg Speed`,
+    col = subset_data$Zone,
+    pch = 16,
+    main = "Scatter Plot of average speed v/s log of distance",
+    xlab = "Log of Distance",
+    ylab = "Average Speed (km/hr)",
+    xlim = c(min(log(as.numeric(subset_data$Dist.))), max(log(as.numeric(subset_data$Dist.))))
+  )
+legend(
+  "topright",                          # Legend position
+  legend = unique(subset_data$Zone),                    # Legend labels
+  col = unique(subset_data$Zone),      # Legend colors
+  pch = 16,                            # Point symbol
+  title = "Zone",                      # Legend title
+  cex = 0.8                            # Legend text size
+)
+zones <- levels(subset_data$Zone)
+unique_colors <- unique(subset_data$Zone)
+  
+for (i in seq_along(zones)) {
+    zone <- zones[i]
+    zone_subset <- subset_data[subset_data$Zone == zone, ]
+    lm_model <- lm(`Avg Speed` ~ log(as.numeric(Dist.)), data = zone_subset)
+    
+    # Use the color of the corresponding zone
+    line_color <- unique_colors[i]
+    
+    abline(lm_model, col = line_color, lty = 2)
+}
+
+```
+
+## 5.3 Average Speed based on train type
+
+Lastly, we plotted a bar graph based on average speed of various trains by categorising them with their type.
+
+```{r, cache=FALSE, width=10, fig.width=10, fig.height=4}
+#| warning: false
+#| echo: false
+
+filtered_data <- all_trains_table %>% filter(Train_Type %in% c("ac-express", "demu", "duronto", "emu", "express", "garibrath", "intercity", "kolkata-emu", "memu", "passenger", "rajdhani", "shatabdi", "special-trains", "vande-bharat", "superfast"))
+
+ggplot(data = filtered_data) +
+  geom_bar(
+    mapping = aes(x = reorder(Train_Type, `Avg Speed`), y = `Avg Speed`, fill = Train_Type),
+    stat = "identity",
+    position = "dodge"
+  ) +
+  theme_minimal() + theme(axis.text.x = element_text(size = 8)) +
+  labs(
+    title = "Average Speed v/s Train Type",
+    x = "Train Type",
+    y = "Average Speed (km/h)"
+  ) +
+  guides(fill = FALSE)
+```
+
+The graph indicates Vande Bharat as the fastest at 90 km/h, followed by Rajdhani Express. MEMU, EMU, and DEMU trains are the slowest. Within each type, there's a wide speed range due to factors like distance, stops.
+
+\newpage
+
+\huge 6. Conclusion
+
+\normalsize
+
+**6.1** In conclusion, the project has provided valuable insights into the factors contributing to delays in our railway system. Through meticulous data collection, analysis, and interpretation, we have identified patterns, trends, and potential root causes of delays.
+
+**6.2** From the visualization of delays and average speed , we can say that there is no clear relationship between them. The correlation between delays and average speed is 0.27.Now after dividing the plot into different areas by highlighting various duration groups(long (30-60 hrs), medium(15-30 hrs), short(0-15 hrs)), then we noticed that the number of short duration train is significantly more than medium and long duration trains. However, the range of delays is still limited. Even, within different subgroups, there is no clear relation between average speed and train delays.From the boxplot of different duration groups with respect to delays, the spread for medium duration trains is the most. The number of outlier is more in medium duration trains.
+
+**6.3** Rajdhani express a prominent train services in India as the name suggest it believe to be cover all the states of India but from the route map we see either it cover them unequally or does not provide service to those states.
+
+**6.4** On the other hand from the map we see Passenger train services in India is very dense and well distributed which helps rural population of India to travel better. From the route map of passenger train we observed that density of train is less in South and North zone, this is due to hill and plateau terrain and due to the local trains in southerns part of country.
+
+**6.5** After analyzing all train types we come with a statement that the new train Vande Bharat is evenly distributed across whole India. There is a positive correlation between distance of the journey and average speed of the train.So, for the long route journey the fastest trains are used more.
+
+**6.6** After analyzing the speed of all train types, we conclude that average speed of Rajdhani Express is more than any other train type.
+
+This information is instrumental in formulating targeted strategies to enhance the efficiency and reliability of our train services.We can help to improve the punctuality of trains and to reduce the inconvenience caused by delays for passengers.
+
+\newpage
+
+\huge 7.References
+
+\normalsize
+
+1\. [Total Train Info](https://www.totaltraininfo.com/)
+
+2\. [Running Status](https://runningstatus.in/history/)
+
+3\. [Travel Khana](https://www.travelkhana.com/rail-infoindian-railway-station-list-with-station-code)
